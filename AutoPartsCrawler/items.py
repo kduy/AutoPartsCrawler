@@ -9,10 +9,11 @@ from scrapy.item import Item, Field
 
 
 class PartsItem(Item):
-    # metadata
+    #metadata
     modelYear = Field()
     make = Field()
     model = Field()
     trim = Field()
     section = Field()
     component = Field()
+    price = Field()
