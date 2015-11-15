@@ -37,17 +37,23 @@ class PartsCrawlSpider(CrawlSpider):
         #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&VID=412058&MakeID=2&Make=Audi&ModelYear=2014&MODEL=Q7&Engine=V6-3.0-GAS'
         #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Make=Audi-OEM-Parts&ModelYear=2014&MODEL=Q7'
         #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&ModelYear=2015&Make=Audi-OEM-Parts'
-        'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Title=Audi-OEM-Parts'
+        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Title=Audi-OEM-Parts'
+        'https://www.parts.com/index.cfm'
     ]
 
     def parse(self, response):
-        allMakeSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
+        allMakeSelector = response.xpath('//div[@class="item-image"]//@href')
         for url in allMakeSelector.extract():
+            yield Request(url, callback=self.parse_make)
+
+    def parse_make(self, response):
+        allYearSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
+        for url in allYearSelector.extract():
             yield Request(url, callback=self.parse_year)
 
     def parse_year(self, response):
-        allYearSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
-        for url in allYearSelector.extract():
+        allModelSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
+        for url in allModelSelector.extract():
             yield Request(url, callback=self.parse_model)
 
     def parse_model(self, response):
