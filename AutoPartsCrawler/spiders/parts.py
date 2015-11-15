@@ -34,15 +34,18 @@ class PartsCrawlSpider(CrawlSpider):
         #'https://www.parts.com/index.cfm?fuseaction=store.sectionDiagram&siteid=2&vehicleid=412057&diagram=1381020&section=ELECTRICAL&Title=Audi-Q7-Premium-V6-3.0-%20Liter-GAS'
         #'https://www.parts.com/index.cfm'
         #'https://www.parts.com/index.cfm?fuseaction=store.sectionSearch&storeid=2&vehicleid=412058&section=ENGINE&Title=Audi-Q7-Premium%20Plus-V6-3.0-GAS-OEM-Parts'
-        'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&VID=412058&MakeID=2&Make=Audi&ModelYear=2014&MODEL=Q7&Engine=V6-3.0-GAS'
+        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&VID=412058&MakeID=2&Make=Audi&ModelYear=2014&MODEL=Q7&Engine=V6-3.0-GAS'
+        'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Make=Audi-OEM-Parts&ModelYear=2014&MODEL=Q7'
     ]
 
-
-
     def parse(self, response):
+        allTrimSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
+        for url in allTrimSelector.extract():
+            yield Request(url, callback=self.parse_trim)
+
+    def parse_trim(self, response):
         allSectionSelector = response.xpath('//div[@class="col-md-4 col-sm-3"]//@href')
         for url in allSectionSelector.extract():
-            print url
             yield Request(url, callback=self.parse_section)
 
 
