@@ -38,6 +38,7 @@ class PartsCrawlSpider(CrawlSpider):
     ]
 
 
+
     def parse(self, response):
         allSectionSelector = response.xpath('//div[@class="col-md-4 col-sm-3"]//@href')
         for url in allSectionSelector.extract():
