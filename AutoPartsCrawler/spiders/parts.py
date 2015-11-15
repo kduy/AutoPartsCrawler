@@ -36,10 +36,16 @@ class PartsCrawlSpider(CrawlSpider):
         #'https://www.parts.com/index.cfm?fuseaction=store.sectionSearch&storeid=2&vehicleid=412058&section=ENGINE&Title=Audi-Q7-Premium%20Plus-V6-3.0-GAS-OEM-Parts'
         #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&VID=412058&MakeID=2&Make=Audi&ModelYear=2014&MODEL=Q7&Engine=V6-3.0-GAS'
         #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Make=Audi-OEM-Parts&ModelYear=2014&MODEL=Q7'
-        'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&ModelYear=2015&Make=Audi-OEM-Parts'
+        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&ModelYear=2015&Make=Audi-OEM-Parts'
+        'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Title=Audi-OEM-Parts'
     ]
 
     def parse(self, response):
+        allMakeSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
+        for url in allMakeSelector.extract():
+            yield Request(url, callback=self.parse_year)
+
+    def parse_year(self, response):
         allYearSelector = response.xpath('//div[@class="col-md-3 col-sm-4"]//@href')
         for url in allYearSelector.extract():
             yield Request(url, callback=self.parse_model)
