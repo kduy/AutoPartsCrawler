@@ -6,6 +6,7 @@ from scrapy.selector import HtmlXPathSelector
 import re
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
+from scrapy.selector import Selector
 
 from AutoPartsCrawler.items import PartsItem
 
@@ -45,9 +46,14 @@ class PartsCrawlSpider(CrawlSpider):
         l.add_value('section',re.match(r'(.*)&section=(\w+)&(.*)', response.url).group(2) )
 
         # price
-        components = response.xpath('//fieldset[@class="contentwaiting"]')
+        components = Selector(response).xpath('//fieldset[@class="contentwaiting"]')
+        groups = {}
         for component in components:
-            
+            lookupNo = component.xpath('section/dl[3]/dd/dfn/text()').re(r'(\d+)')
+            price = component.xpath('section/dl[2]/dd[2]/del/text()').re(r'^\$(.*)')
+            if not groups.has_key(lookupNo):
+                groups[lookupNo] = price
+                print lookupNo +"-"+ price
 
 
         return l.load_item()
