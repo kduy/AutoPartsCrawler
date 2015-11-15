@@ -11,9 +11,9 @@ from scrapy.http import Request
 import locale
 import urlparse
 import logging
+from random import randint
 
 
-from AutoPartsCrawler.items import PartsItem
 
 
 logger = logging.getLogger('PartsCrawlSpider')
@@ -24,6 +24,21 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+
+from scrapy.item import Item, Field
+
+
+class PartsItem(Item):
+    #metadata
+    modelYear = Field()
+    make = Field()
+    model = Field()
+    trim = Field()
+    section = Field()
+    component = Field()
+    price = Field()
+
+
 class PartsCrawlSpider(CrawlSpider):
 
 
@@ -31,13 +46,6 @@ class PartsCrawlSpider(CrawlSpider):
     name = 'parts_crawler'
     allowed_domain = ['https://www.parts.com/']
     start_urls = [
-        #'https://www.parts.com/index.cfm?fuseaction=store.sectionDiagram&siteid=2&vehicleid=412057&diagram=1381020&section=ELECTRICAL&Title=Audi-Q7-Premium-V6-3.0-%20Liter-GAS'
-        #'https://www.parts.com/index.cfm'
-        #'https://www.parts.com/index.cfm?fuseaction=store.sectionSearch&storeid=2&vehicleid=412058&section=ENGINE&Title=Audi-Q7-Premium%20Plus-V6-3.0-GAS-OEM-Parts'
-        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&VID=412058&MakeID=2&Make=Audi&ModelYear=2014&MODEL=Q7&Engine=V6-3.0-GAS'
-        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Make=Audi-OEM-Parts&ModelYear=2014&MODEL=Q7'
-        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&ModelYear=2015&Make=Audi-OEM-Parts'
-        #'https://www.parts.com/index.cfm?fuseaction=store.MakeSearch&MakeID=2&Title=Audi-OEM-Parts'
         'https://www.parts.com/index.cfm'
     ]
 
@@ -115,7 +123,12 @@ class PartsCrawlSpider(CrawlSpider):
         components = Selector(response).xpath('//fieldset[@class="contentwaiting"]')
         groups = {}
         for component in components:
-            lookupNo = component.xpath('section/dl[3]/dd/dfn/text()').re(r'(\d+)')[0]
+            lookupNoPath = component.xpath('section/dl[3]/dd/dfn/text()').re(r'(\d+)')
+            lookupNo = 0
+            if lookupNoPath:
+                lookupNo = lookupNoPath[0]
+            else:
+                lookupNo = randint(50,100)
             price = component.xpath('section/dl[2]/dd[2]/del/text()').re(r'^\$(.*)')[0]
             if not groups.has_key(lookupNo):
                 groups[lookupNo] = price
